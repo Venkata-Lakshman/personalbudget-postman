@@ -74,9 +74,11 @@ div.hero h2 {
 }
 
 .bottom {
+    font-size: 15px;
+    align-items: center;
     height: 50px;
     background-color: #b4c6f0;
-    padding: 40px;
+    padding: 10px;
 }
 
 .center {
@@ -89,6 +91,15 @@ div.hero h2 {
     max-width: 340px;
     text-align: justify;
     margin: 20px;
+}
+.search-bar {
+    height: 22.5px;
+}
+
+.image{
+    height:30px;
+    weidth: 30px;
+    float: right;
 }
 
 @media screen and (min-width: 768px) {

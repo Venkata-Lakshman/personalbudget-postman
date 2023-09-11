@@ -3,24 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Budget</title>
-    <link rel="stylesheet" href="/pb1/reset.css">
-    <link rel="stylesheet" href="/pb1/main.css">
+    <!-- This is an SEO Change -->
+    <meta name="description" content="Gate Way for Budget Management">
+    <!-- This is an SEO Change -->
+    <meta name="keywords" content="HTML,CSS">
+    <!-- This is an SEO Change -->
+    <title><strong>Personal Budget</strong></title>
+    <link rel="stylesheet" href="/reset.css">
+    <link rel="stylesheet" href="/main.css">
 </head>
 <body>
-
-    <div class="menu">
+    
+ <div class="menu">
         <ul>
             <li><a href="/">Homepage</a></li>
             <li><a href="/about.html">About</a></li>
             <li><a href="/login.html">Login</a></li>
             <li><a href="https://google.com">Google</a></li>
+            <!-- This is an A11y Change, giving type attribute 
+                to a input is accessibility enhancement here-->
+            <li><input type="text" class="search-bar" placeholder="Search.."></li>
         </ul>
+         <!-- This is an A11y Change -->
+        <img class= "image" src="images/profile pic logo.webp" alt="profile pic icon"/>
     </div>
 
     <div class="hero">
-        <h1>Personal Budget</h1>
-        <h2>A personal-budget management app</h2>
+        <!-- This is Semantic HTML Change -->
+        <main> 
+            <h1>Personal Budget</h1>
+            <h2>A personal-budget management app</h2>
+            <!-- This is an A11y Change -->
+            <html lang="es">
+                <h2 >Una aplicación de gestión de presupuesto personal</h2>
+            </html>
+        </main>
     </div>
 
     <div class="container center">
@@ -28,12 +45,15 @@
         <div class="page-area">
 
             <div class="text-box">
-                <h1>Stay on track</h1>
-                <p>
-                    Do you know where you are spending your money? If you really stop to track it down,
-                    you would get surprised! Proper budget management depends on real data... and this
-                    app will help you with that!
-                </p>
+                <!-- This is Semantic HTML Change -->
+                <section>
+                    <h1>Stay on track</h1>
+                    <p>
+                        Do you know where you are spending your money? If you really stop to track it down,
+                        you would get surprised! Proper budget management depends on real data... and this
+                        app will help you with that!
+                    </p>
+                </section>
             </div>
     
             <div class="text-box">
@@ -97,7 +117,10 @@
 
     <div class="bottom">
         <div class="center">
-            All rights reserved &copy; Fabio Nolasco
+            <!-- This is Semantic HTML Change -->
+            <footer>
+                <p>Venkata Lakshman-801363910<br>
+              </footer>
         </div>
     </div>
 
