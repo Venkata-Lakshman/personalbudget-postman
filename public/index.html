@@ -105,12 +105,14 @@
                 </p>
             </div>
     
-            <div class="text-box">
-                <h1>801363910's Chart</h1>
+            <article><h1>801363910's Chart</h1>
                 <p>
-                    <canvas id="myChart" width="400" height="400"></canvas>
+                    <canvas id="myChart" width="800" height="300"></canvas>
                 </p>
-            </div>
+            </article>
+            <h1>801363910's D3JSChart</h1>
+           <div id="pie-chart"></div>
+            
 
         </div>
 
@@ -124,16 +126,24 @@
               </footer>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js" integrity="sha512-aoTNnqZcT8B4AmeCFmiSnDlc4Nj/KPaZyB5G7JnOnUEkdNpCZs1LCankiYi01sLTyWy+m2P+W4XM+BuQ3Q4/Dg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <!-- <script type= "module" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js" integrity="sha512-7U4rRB8aGAHGVad3u2jiC7GA5/1YhQcQjxKeaVms/bT66i3LVBMRcBI9KwABNWnxOSwulkuSXxZLGuyfvo7V1A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> --> --> -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"
+      integrity="sha512-aoTNnqZcT8B4AmeCFmiSnDlc4Nj/KPaZyB5G7JnOnUEkdNpCZs1LCankiYi01sLTyWy+m2P+W4XM+BuQ3Q4/Dg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"
+      integrity="sha512-s+xg36jbIujB2S2VKfpGmlC3T5V2TF3lY48DX7u2r9XzGzgPsa6wTpOQA7J9iffvdeBN0q9tKzRxVxw1JviZPg=="
+      crossorigin="anonymous"
+    ></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
     <script>
       var dataSource = {
-          datasets: [
-            {
-                data: [ ],
-                backgroundColor: [
+        datasets: [
+          {
+            data: [],
+            backgroundColor: [
                     '#7D3C98',
                     '#2ECC71',
                     '#F633FF',
@@ -141,35 +151,198 @@
                     '#ffcd56',
                     '#ff6384',
                     '#17202A',
-                ],
-            }
-          ],
-          labels: []
-          
+            ],
+          },
+        ],
+        labels: [],
       };
 
-      function createChart() {
+      var newDataSource = [];
+
+      var svg = d3.select("#pie-chart").append("svg").append("g");
+
+      svg.append("g").attr("class", "slices");
+      svg.append("g").attr("class", "labels");
+      svg.append("g").attr("class", "lines");
+
+      var width = 650,
+        height = 300,
+        radius = Math.min(width, height) / 2;
+
+      var pie = d3.layout
+        .pie()
+        .sort(null)
+        .value(function (d) {
+          return d.budget;
+        });
+
+      var arc = d3.svg
+        .arc()
+        .outerRadius(radius * 0.8)
+        .innerRadius(radius * 0.4);
+
+      var outerArc = d3.svg
+        .arc()
+        .innerRadius(radius * 0.9)
+        .outerRadius(radius * 0.9);
+
+      svg.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+      var key = function (d) {
+        return d.data.title;
+      };
+
+      var titles = []
+      var getTitles = ()=>{
+        axios.get("/budget").then(function (res) {
+            for(var i=0;i<res.data.myBudget.length;i++){
+                titles.push(res.data.myBudget[i].title)
+            }
+        })
+      }
+      getTitles();
+
+      var color = d3.scale
+        .ordinal()
+        .domain(titles)
+        .range([
+                     '#7D3C98',
+                    '#2ECC71',
+                    '#F633FF',
+                    '#D35400',
+                    '#ffcd56',
+                    '#ff6384',
+                    '#17202A',
+        ]);
+
+        function createChart() {
         var ctx = document.getElementById("myChart").getContext("2d");
         var myPieChart = new Chart(ctx, {
-            type: 'pie',
-            data: dataSource
+          type: "pie",
+          data: dataSource,
         });
       }
-       function getBudget() {
-        axios.get('/budget')
-        .then(function (res) {
-            // console.log(res.data);
-            for (var i=0; i < res.data.myBudget.length; i++) {
-                dataSource.datasets[0].data[i] = res.data.myBudget[i].budget;
-                dataSource.labels[i] = res.data.myBudget[i].title;
-            }
-            createChart();
+
+
+
+      function change(data) {
+        /* ------- PIE SLICES -------*/
+        var slice = svg
+          .select(".slices")
+          .selectAll("path.slice")
+          .data(pie(data), key);
+
+        slice
+          .enter()
+          .insert("path")
+          .style("fill", function (d) {
+            return color(d.data.title);
+          })
+          .attr("class", "slice");
+
+        slice
+          .transition()
+          .duration(1000)
+          .attrTween("d", function (d) {
+            this._current = this._current || d;
+            var interpolate = d3.interpolate(this._current, d);
+            this._current = interpolate(0);
+            return function (t) {
+              return arc(interpolate(t));
+            };
+          });
+
+        slice.exit().remove();
+
+        /* ------- TEXT LABELS -------*/
+
+        var text = svg.select(".labels").selectAll("text").data(pie(data), key);
+
+        text
+          .enter()
+          .append("text")
+          .attr("dy", ".35em")
+          .text(function (d) {
+            return d.data.title;
+          });
+
+        function midAngle(d) {
+          return d.startAngle + (d.endAngle - d.startAngle) / 2;
+        }
+
+        text
+          .transition()
+          .duration(1000)
+          .attrTween("transform", function (d) {
+            this._current = this._current || d;
+            var interpolate = d3.interpolate(this._current, d);
+            this._current = interpolate(0);
+            return function (t) {
+              var d2 = interpolate(t);
+              var pos = outerArc.centroid(d2);
+              pos[0] = radius * (midAngle(d2) < Math.PI ? 1 : -1);
+              return "translate(" + pos + ")";
+            };
+          })
+          .styleTween("text-anchor", function (d) {
+            this._current = this._current || d;
+            var interpolate = d3.interpolate(this._current, d);
+            this._current = interpolate(0);
+            return function (t) {
+              var d2 = interpolate(t);
+              return midAngle(d2) < Math.PI ? "start" : "end";
+            };
+          });
+
+        text.exit().remove();
+
+        /* ------- SLICE TO TEXT POLYLINES -------*/
+
+        var polyline = svg
+          .select(".lines")
+          .selectAll("polyline")
+          .data(pie(data), key);
+
+        polyline.enter().append("polyline");
+
+        polyline
+          .transition()
+          .duration(1000)
+          .attrTween("points", function (d) {
+            this._current = this._current || d;
+            var interpolate = d3.interpolate(this._current, d);
+            this._current = interpolate(0);
+            return function (t) {
+              var d2 = interpolate(t);
+              var pos = outerArc.centroid(d2);
+              pos[0] = radius * 0.95 * (midAngle(d2) < Math.PI ? 1 : -1);
+              return [arc.centroid(d2), outerArc.centroid(d2), pos];
+            };
+          });
+
+        polyline.exit().remove();
+      }
+
+
+
+      function getBudget() {
+        axios.get("/budget").then(function (res) {
+        //   console.log(res.data.myBudget);
+          for (var i = 0; i < res.data.myBudget.length; i++) {
+            dataSource.datasets[0].data[i] = res.data.myBudget[i].budget;
+            dataSource.labels[i] = res.data.myBudget[i].title;
+
+            newDataSource.push({
+              "title": res.data.myBudget[i].title,
+              "budget": res.data.myBudget[i].budget,
+            });
+          }
+          createChart();
+          change(newDataSource);
         });
-       }
-       
-       getBudget();
+      }
+
+      getBudget();
     </script>
-
-
-</body>
+  </body>
 </html>
